@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-950 text-slate-100 antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(45, 212, 191, 0.2), transparent 32%),
+      radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 28%),
+      linear-gradient(180deg, #061018 0%, #0b1722 55%, #07111a 100%);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  * {
+    @apply border-slate-200/10;
+  }
+
+  ::selection {
+    background: rgba(45, 212, 191, 0.25);
+  }
+}
+
+@layer components {
+  .shell-panel {
+    @apply rounded-3xl border border-white/10 bg-white/5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl;
+  }
+
+  .medical-gradient {
+    background-image:
+      linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(59, 130, 246, 0.16)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  }
+
+  .glass-input {
+    @apply w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-300 focus:ring-2 focus:ring-teal-400/20;
+  }
+
+  .primary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-teal-300/50 hover:bg-white/10;
+  }
+}
