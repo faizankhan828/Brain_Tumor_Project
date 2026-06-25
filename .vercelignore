@@ -1,0 +1,27 @@
+# Tell Vercel to ignore everything except the frontend source.
+# Vercel should ONLY run: npm install && npm run build
+
+# Python backend — not deployed to Vercel
+app/
+requirements.txt
+requirements-dev.txt
+
+# ML model and dataset — too large and not needed
+models/
+dataset/
+
+# Docker and server configs — not relevant to Vercel
+Dockerfile.backend
+Dockerfile.frontend
+docker-compose.yml
+nginx.conf
+render.yaml
+
+# Runtime data
+static/
+*.db
+
+# Python caches
+__pycache__/
+.venv/
+*.py[cod]
