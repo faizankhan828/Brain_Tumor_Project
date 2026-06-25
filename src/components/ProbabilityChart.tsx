@@ -84,7 +84,7 @@ export function ProbabilityChart({ result }: ProbabilityChartProps) {
               <LabelList
                 dataKey="probability"
                 position="right"
-                formatter={(v: number) => `${v.toFixed(1)}%`}
+                formatter={(v: unknown) => `${Number(v).toFixed(1)}%`}
                 style={{ fill: '#64748b', fontSize: 11 }}
               />
             </Bar>
