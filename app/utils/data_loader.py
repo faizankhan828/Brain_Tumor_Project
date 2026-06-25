@@ -121,6 +121,8 @@ def oversample_meningioma(
         if src.exists():
             shutil.copytree(src, dst)
             print(f"   Copied {cls:<15} → {dst}  ({len(list(dst.iterdir()))} files)")
+        else:
+            print(f"   [WARN] {cls} not found in {train_dir} — skipping")
 
     # ── Step 2: generate extra augmented meningioma images ──────────────────
     aug_gen   = _build_aug_datagen_no_rescale()
@@ -231,6 +233,12 @@ def get_generators(
     if train_dir is None:
         if rebuild_balanced or not TRAIN_BAL_DIR.exists():
             oversample_meningioma(seed=seed)
+        else:
+            # Validate all 4 classes exist — rebuild if any are missing
+            missing = [c for c in CLASSES if not (TRAIN_BAL_DIR / c).exists()]
+            if missing:
+                print(f"\n[WARN] train_balanced is missing classes: {missing} — rebuilding...")
+                oversample_meningioma(seed=seed)
         train_dir = TRAIN_BAL_DIR
 
     # ── Training generator (augmented) ──────────────────────────────────────

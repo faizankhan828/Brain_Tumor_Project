@@ -1,0 +1,77 @@
+version: "3.9"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Brain Tumor MRI Detector — Docker Compose
+#
+# Usage:
+#   Local production test:
+#     docker compose up --build
+#
+#   With environment overrides:
+#     VITE_API_URL=https://api.yourdomain.com docker compose up --build
+#
+#   VPS deployment (pull images from registry):
+#     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Backend (FastAPI + TensorFlow) ─────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: btmd_backend
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/brain_tumor.db}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost,http://frontend}
+    volumes:
+      # Persist database and uploaded files across container restarts
+      - btmd_data:/app/data
+      - btmd_static:/app/static
+      # Model weights — mount from host so you can swap without rebuild
+      - ./models:/app/models:ro
+    ports:
+      # Only exposed for direct API access / debugging.
+      # In production behind nginx, you can remove this.
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 90s
+      retries: 3
+    networks:
+      - btmd_net
+
+  # ── Frontend (Nginx + React static build) ──────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        # When running behind this compose setup, frontend proxies to /api
+        # (handled by nginx.conf) so VITE_API_URL can stay as empty string.
+        VITE_API_URL: ""
+    container_name: btmd_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - btmd_net
+
+# ── Named volumes ─────────────────────────────────────────────────────────────
+volumes:
+  btmd_data:
+  btmd_static:
+
+# ── Network ───────────────────────────────────────────────────────────────────
+networks:
+  btmd_net:
+    driver: bridge

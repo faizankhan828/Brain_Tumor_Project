@@ -3,56 +3,120 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    color-scheme: light;
-  }
+  :root { color-scheme: dark; }
 
-  html {
-    scroll-behavior: smooth;
-  }
+  html { scroll-behavior: smooth; }
 
   body {
-    @apply min-h-screen bg-slate-950 text-slate-100 antialiased;
+    @apply min-h-screen bg-[#050d18] text-slate-100 antialiased;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     background-image:
-      radial-gradient(circle at top left, rgba(45, 212, 191, 0.2), transparent 32%),
-      radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 28%),
-      linear-gradient(180deg, #061018 0%, #0b1722 55%, #07111a 100%);
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgba(20,184,166,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 90% 5%,  rgba(59,130,246,0.14) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 50% 100%,rgba(99,102,241,0.08) 0%, transparent 70%);
   }
 
-  #root {
-    min-height: 100vh;
+  #root { min-height: 100vh; }
+
+  ::selection { background: rgba(20,184,166,0.28); color: #fff; }
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: rgba(255,255,255,0.12); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(20,184,166,0.5); }
+
+@layer components {
+  /* Glass card */
+  .shell-panel {
+    @apply rounded-2xl border border-white/[0.08] bg-white/[0.04]
+           shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]
+           backdrop-blur-2xl;
   }
 
-  * {
-    @apply border-slate-200/10;
+  /* Elevated card — slightly more prominent */
+  .card-elevated {
+    @apply rounded-2xl border border-white/[0.1] bg-white/[0.06]
+           shadow-[0_16px_48px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]
+           backdrop-blur-2xl;
   }
 
-  ::selection {
-    background: rgba(45, 212, 191, 0.25);
+  /* Teal gradient accent strip */
+  .medical-gradient {
+    background: linear-gradient(135deg,
+      rgba(20,184,166,0.20) 0%,
+      rgba(59,130,246,0.14) 50%,
+      rgba(99,102,241,0.10) 100%);
+  }
+
+  /* Form inputs */
+  .glass-input {
+    @apply w-full rounded-xl border border-white/[0.1] bg-slate-900/70
+           px-4 py-3 text-sm text-slate-100 outline-none transition-all
+           placeholder:text-slate-500
+           focus:border-teal-400/60 focus:ring-2 focus:ring-teal-400/15
+           focus:bg-slate-900/90;
+  }
+
+  /* Primary CTA */
+  .primary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+           bg-gradient-to-r from-teal-500 to-teal-400
+           px-5 py-2.5 text-sm font-semibold text-slate-950
+           shadow-[0_4px_14px_rgba(20,184,166,0.35)]
+           transition-all duration-200
+           hover:from-teal-400 hover:to-teal-300
+           hover:shadow-[0_6px_20px_rgba(20,184,166,0.45)]
+           active:scale-[0.98]
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none;
+  }
+
+  /* Secondary ghost */
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl
+           border border-white/[0.1] bg-white/[0.05]
+           px-5 py-2.5 text-sm font-semibold text-slate-200
+           transition-all duration-200
+           hover:border-teal-400/30 hover:bg-white/[0.09] hover:text-white
+           active:scale-[0.98];
+  }
+
+  /* Stat badge */
+  .stat-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full
+           border border-white/[0.1] bg-white/[0.06]
+           px-3 py-1 text-xs font-medium text-slate-300;
+  }
+
+  /* Glowing dot */
+  .live-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full bg-emerald-400
+           shadow-[0_0_6px_2px_rgba(52,211,153,0.6)];
+  }
+
+  /* Section label */
+  .section-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-400/80;
   }
 }
 
-@layer components {
-  .shell-panel {
-    @apply rounded-3xl border border-white/10 bg-white/5 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl;
-  }
+/* ── Keyframe animations ───────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);    opacity: 0.6; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
 
-  .medical-gradient {
-    background-image:
-      linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(59, 130, 246, 0.16)),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-  }
-
-  .glass-input {
-    @apply w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-teal-300 focus:ring-2 focus:ring-teal-400/20;
-  }
-
-  .primary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-teal-300 disabled:cursor-not-allowed disabled:opacity-60;
-  }
-
-  .secondary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-teal-300/50 hover:bg-white/10;
-  }
+.animate-fade-up  { animation: fade-up  0.45s ease both; }
+.animate-fade-in  { animation: fade-in  0.3s  ease both; }
+.animate-pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.2,0.6,0.4,1) infinite;
 }

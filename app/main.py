@@ -10,6 +10,7 @@ and loads the TensorFlow/Keras model during lifecycle startup.
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from contextlib import asynccontextmanager
 
@@ -108,7 +109,9 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for integration, can be narrowed down
+    # Read allowed origins from env var — comma-separated list.
+    # Default "*" is kept for local dev; always set ALLOWED_ORIGINS in production.
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

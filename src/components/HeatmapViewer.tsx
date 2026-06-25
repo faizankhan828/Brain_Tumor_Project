@@ -1,32 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import { Maximize2, X } from 'lucide-react'
+import { Maximize2, ScanSearch, X } from 'lucide-react'
 
 interface HeatmapViewerProps {
-  /** Blob URL or data URL of the original MRI image */
   originalUrl: string
-  /** data:image/png;base64,… string returned by the backend Grad-CAM */
-  heatmapUrl: string
-  label: string
+  heatmapUrl:  string
+  label:       string
 }
 
 export function HeatmapViewer({ originalUrl, heatmapUrl, label }: HeatmapViewerProps) {
-  const [mode, setMode] = useState<'original' | 'heatmap'>('original')
+  const [mode,   setMode]   = useState<'original' | 'heatmap'>('original')
   const [zoomed, setZoomed] = useState(false)
-  const dialogRef = useRef<HTMLDialogElement>(null)
+  const dialogRef           = useRef<HTMLDialogElement>(null)
 
-  // Open / close the zoom lightbox
   useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    if (zoomed) {
-      dialog.showModal()
-    } else {
-      dialog.close()
-    }
+    const d = dialogRef.current
+    if (!d) return
+    zoomed ? d.showModal() : d.close()
   }, [zoomed])
 
-  // Close on backdrop click
-  const handleDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+  const handleBackdrop = (e: React.MouseEvent<HTMLDialogElement>) => {
     if (e.target === dialogRef.current) setZoomed(false)
   }
 
@@ -38,84 +30,83 @@ export function HeatmapViewer({ originalUrl, heatmapUrl, label }: HeatmapViewerP
         {/* Header */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm text-slate-400">Image viewer</p>
-            <h3 className="mt-1 text-lg font-semibold text-white">Original vs Grad-CAM heatmap</h3>
+            <p className="section-label">Image viewer</p>
+            <h3 className="mt-0.5 text-base font-bold text-white">Original vs Grad-CAM heatmap</h3>
           </div>
 
-          {/* Toggle */}
-          <div className="flex rounded-full border border-white/10 bg-white/5 p-1">
-            <button
-              type="button"
-              onClick={() => setMode('original')}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                mode === 'original' ? 'bg-white text-slate-950' : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Original
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('heatmap')}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                mode === 'heatmap'
-                  ? 'bg-teal-400 text-slate-950'
-                  : 'text-slate-300 hover:text-white'
-              }`}
-            >
-              Heatmap
-            </button>
+          {/* Toggle pill */}
+          <div className="flex rounded-xl border border-white/[0.08] bg-white/[0.04] p-1">
+            {(['original', 'heatmap'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                className={`rounded-lg px-4 py-1.5 text-xs font-semibold capitalize transition-all ${
+                  mode === m
+                    ? m === 'original'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'bg-teal-400 text-slate-900 shadow-sm shadow-teal-400/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {m === 'heatmap' ? 'Grad-CAM' : 'Original'}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Two-panel side-by-side layout */}
-        <div className="grid gap-3 sm:grid-cols-2">
-          {/* Original panel */}
-          <PanelCard
+        {/* Two-panel grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <Panel
             src={originalUrl}
             alt={`${label} — original`}
             caption="Original MRI"
             active={mode === 'original'}
-            onZoom={() => {
-              setMode('original')
-              setZoomed(true)
-            }}
+            onZoom={() => { setMode('original'); setZoomed(true) }}
           />
-          {/* Heatmap panel */}
-          <PanelCard
+          <Panel
             src={heatmapUrl}
-            alt={`${label} — Grad-CAM heatmap`}
-            caption="Grad-CAM heatmap overlay"
+            alt={`${label} — heatmap`}
+            caption="Grad-CAM overlay"
             active={mode === 'heatmap'}
-            onZoom={() => {
-              setMode('heatmap')
-              setZoomed(true)
-            }}
+            onZoom={() => { setMode('heatmap'); setZoomed(true) }}
           />
         </div>
+
+        {/* Hint */}
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slate-600">
+          <ScanSearch className="h-3 w-3" />
+          Click either panel to zoom full-screen
+        </p>
       </section>
 
-      {/* Zoom lightbox */}
+      {/* Lightbox */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <dialog
         ref={dialogRef}
-        onClick={handleDialogClick}
-        className="fixed inset-0 z-50 m-auto max-h-[90vh] max-w-[90vw] overflow-hidden rounded-3xl border border-white/15 bg-slate-950/95 p-0 shadow-2xl backdrop:bg-black/70 backdrop:backdrop-blur-sm"
+        onClick={handleBackdrop}
+        className="fixed inset-0 z-50 m-auto max-h-[92vh] max-w-[92vw] overflow-hidden
+                   rounded-2xl border border-white/[0.1] bg-[#060e1a]/98 p-0 shadow-2xl
+                   backdrop:bg-black/80 backdrop:backdrop-blur-md"
       >
         <div className="relative">
           <img
             src={activeUrl}
             alt={label}
-            className="block max-h-[85vh] max-w-[88vw] object-contain"
+            className="block max-h-[88vh] max-w-[90vw] object-contain"
           />
           <button
             type="button"
             onClick={() => setZoomed(false)}
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-slate-900/80 text-white transition hover:bg-slate-700"
-            aria-label="Close zoom"
+            aria-label="Close"
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center
+                       rounded-xl border border-white/[0.15] bg-slate-900/90 text-white
+                       transition hover:bg-slate-700"
           >
             <X className="h-4 w-4" />
           </button>
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 to-transparent px-4 py-3 text-sm text-slate-300">
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#060e1a] to-transparent
+                          px-4 py-3 text-xs text-slate-400">
             {mode === 'original' ? 'Original scan' : 'Grad-CAM heatmap overlay'} — {label}
           </div>
         </div>
@@ -124,49 +115,51 @@ export function HeatmapViewer({ originalUrl, heatmapUrl, label }: HeatmapViewerP
   )
 }
 
-// ─── Inner panel card ─────────────────────────────────────────────────────────
-interface PanelCardProps {
-  src: string
-  alt: string
-  caption: string
-  active: boolean
-  onZoom: () => void
+interface PanelProps {
+  src: string; alt: string; caption: string
+  active: boolean; onZoom: () => void
 }
-
-function PanelCard({ src, alt, caption, active, onZoom }: PanelCardProps) {
+function Panel({ src, alt, caption, active, onZoom }: PanelProps) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border transition ${
-        active ? 'border-teal-400/40' : 'border-white/10'
-      } bg-slate-950/70`}
+      onClick={onZoom}
+      className={`group relative cursor-zoom-in overflow-hidden rounded-xl border transition-all duration-200 ${
+        active
+          ? 'border-teal-400/35 shadow-[0_0_16px_rgba(20,184,166,0.15)]'
+          : 'border-white/[0.07] hover:border-white/[0.15]'
+      } bg-slate-950/60`}
     >
       {src ? (
         <img
-          src={src}
-          alt={alt}
-          className="aspect-square w-full cursor-zoom-in object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          onClick={onZoom}
+          src={src} alt={alt}
+          className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         />
       ) : (
-        <div className="flex aspect-square w-full items-center justify-center text-xs text-slate-500">
+        <div className="flex aspect-square items-center justify-center text-xs text-slate-600">
           No image
         </div>
       )}
 
-      {/* Zoom button */}
-      <button
-        type="button"
-        onClick={onZoom}
-        aria-label={`Zoom ${caption}`}
-        className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-900/70 text-slate-300 opacity-0 transition hover:bg-slate-700 group-hover:opacity-100"
-      >
-        <Maximize2 className="h-3.5 w-3.5" />
-      </button>
+      {/* Zoom icon on hover */}
+      <div className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center
+                      rounded-lg border border-white/[0.15] bg-slate-900/80 text-slate-300
+                      opacity-0 transition-opacity group-hover:opacity-100">
+        <Maximize2 className="h-3 w-3" />
+      </div>
 
       {/* Caption bar */}
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 to-transparent px-3 py-2.5 text-xs text-slate-300">
-        {caption}
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 to-transparent px-2.5 py-2">
+        <p className="text-[11px] text-slate-400">{caption}</p>
       </div>
+
+      {/* Active indicator dot */}
+      {active && (
+        <div className="absolute left-2 top-2 flex items-center gap-1 rounded-full
+                        border border-teal-400/30 bg-teal-400/15 px-2 py-0.5">
+          <span className="live-dot" />
+          <span className="text-[10px] font-medium text-teal-300">Active</span>
+        </div>
+      )}
     </div>
   )
 }

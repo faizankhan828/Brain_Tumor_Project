@@ -4,7 +4,7 @@ import { Navbar } from '../components/Navbar'
 import { Sidebar } from '../components/Sidebar'
 
 const titleMap: Record<string, string> = {
-  '/upload': 'Upload MRI Scan',
+  '/upload':  'Upload & Analyse',
   '/history': 'Scan History',
 }
 
@@ -12,14 +12,15 @@ export function AppShell() {
   const location = useLocation()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  useEffect(() => {
-    setSidebarOpen(false)
-  }, [location.pathname])
+  useEffect(() => { setSidebarOpen(false) }, [location.pathname])
 
-  const title = useMemo(() => titleMap[location.pathname] ?? 'MRI Dashboard', [location.pathname])
+  const title = useMemo(
+    () => titleMap[location.pathname] ?? 'Dashboard',
+    [location.pathname],
+  )
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="lg:pl-72">
         <Navbar title={title} onMenuClick={() => setSidebarOpen(true)} />

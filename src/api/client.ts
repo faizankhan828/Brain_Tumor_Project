@@ -18,7 +18,6 @@ export const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token
   if (token) {
-    config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
@@ -104,4 +103,9 @@ export async function downloadReport(scanId: number | string, filename: string):
   anchor.click()
   document.body.removeChild(anchor)
   URL.revokeObjectURL(url)
+}
+
+// ─── Delete scan ──────────────────────────────────────────────────────────────
+export async function deleteScan(scanId: number): Promise<void> {
+  await api.delete(`/api/history/${scanId}`)
 }

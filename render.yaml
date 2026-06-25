@@ -1,0 +1,61 @@
+# render.yaml — Render.com deployment configuration
+# Deploy at: https://dashboard.render.com → New → Blueprint
+# Docs: https://render.com/docs/blueprint-spec
+#
+# This file deploys:
+#   1. backend  — FastAPI + TensorFlow  (Web Service, Docker)
+#   2. frontend — React SPA             (Static Site)
+
+services:
+
+  # ── Backend ─────────────────────────────────────────────────────────────────
+  - type: web
+    name: btmd-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    # Render's free tier has 512 MB RAM — TF needs at least 1 GB.
+    # Use the "Starter" plan ($7/mo) for a real deployment.
+    plan: starter
+    region: oregon
+    branch: main
+
+    envVars:
+      - key: JWT_SECRET_KEY
+        generateValue: true          # Render auto-generates a secure random value
+      - key: DATABASE_URL
+        value: sqlite:////app/data/brain_tumor.db
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: ALLOWED_ORIGINS
+        value: https://btmd-frontend.onrender.com   # Update after frontend deploys
+
+    disk:
+      name: btmd-data
+      mountPath: /app/data
+      sizeGB: 2
+
+    healthCheckPath: /api/health
+
+  # ── Frontend ────────────────────────────────────────────────────────────────
+  - type: web
+    name: btmd-frontend
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    branch: main
+
+    envVars:
+      - key: VITE_API_URL
+        value: https://btmd-backend.onrender.com   # Update after backend deploys
+
+    routes:
+      # React Router — all unknown paths serve index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      # Aggressive cache for hashed assets
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
